@@ -8,13 +8,13 @@
   "server": {
     "ip": "AbyssMCPE.aternos.me",
     "port": 30780,
-    "version": "",
-    "try-creative": false
+    "version": "1.26.32",
+    "try-creative": true
   },
   "position": {
     "enabled": true,
     "x": 0,
-    "y": 100,
+    "y": 99999,
     "z": 0
   },
   "utils": {
