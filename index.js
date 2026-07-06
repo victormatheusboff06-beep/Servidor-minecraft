@@ -18,7 +18,8 @@ const config = {
     host: 'AbyssMCPE.aternos.me', // <- Troque pelo IP do seu servidor
     port: 30780,                     // <- Troque pela porta do seu servidor (se não for a padrão)
     username: 'VictorAFK',           // <- Nome do bot
-    offline: true 
+    offline: true,
+    skipPing: true
 };
 
 let bot;
