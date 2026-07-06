@@ -15,8 +15,8 @@ app.listen(PORT, () => {
 
 // CONFIGURAÇÃO DIRETA DO SEU BOT
 const config = {
-    host: 'IP_DO_SEU_SERVIDOR_AQUI', // <- Troque pelo IP do seu servidor
-    port: 19132,                     // <- Troque pela porta do seu servidor (se não for a padrão)
+    host: 'AbyssMCPE.aternos.me', // <- Troque pelo IP do seu servidor
+    port: 30780,                     // <- Troque pela porta do seu servidor (se não for a padrão)
     username: 'VictorAFK',           // <- Nome do bot
     offline: true 
 };
