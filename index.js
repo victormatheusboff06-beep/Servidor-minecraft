@@ -9,7 +9,7 @@ app.listen(PORT, () => console.log(`[Render] Servidor Web na porta ${PORT}`));
 
 const CONFIG = {
     host: 'AbyssMCPE.aternos.me',
-    port: 59429, // Só mude isso se a Aternos gerar uma porta nova
+    port: 19133, // Só mude isso se a Aternos gerar uma porta nova
     username: 'VictorAFK',
     offline: true
 };
