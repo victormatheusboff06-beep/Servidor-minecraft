@@ -4,37 +4,37 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Sistema para manter o Render online
+// ==========================================
+// CONFIGURAÇÃO: SÓ ALTERE O NÚMERO DA PORTA AQUI NO GITHUB
+// ==========================================
+const CONFIG = {
+    host: 'AbyssMCPE.aternos.me', 
+    port: 30780, // <-- Quando o servidor reiniciar, mude apenas esses 5 números
+    username: 'VictorAFK',           
+    offline: true,
+    skipPing: true
+};
+
+// Sistema para manter o Render acordado
 app.get('/', (req, res) => {
-    res.send('Bot AFK Bedrock Ativo e Online no Render!');
+    res.send('Bot AFK Bedrock Ativo e Monitorado!');
 });
 
 app.listen(PORT, () => {
     console.log(`[Render] Servidor Web ativo na porta ${PORT}`);
 });
 
-// CONFIGURAÇÃO DIRETA DO SEU BOT
-const config = {
-    host: 'AbyssMCPE.aternos.me', // <- Troque pelo IP do seu servidor
-    port: 30780,                     // <- Troque pela porta do seu servidor (se não for a padrão)
-    username: 'VictorAFK',           // <- Nome do bot
-    offline: true,
-    skipPing: true
-};
-
-let bot;
-
 function iniciarBot() {
-    console.log(`[Bot] Conectando ao servidor Bedrock (${config.host}:${config.port})...`);
+    console.log(`[Bot] Tentando conectar em ${CONFIG.host}:${CONFIG.port}...`);
     
-    bot = bedrock.createClient(config);
+    const bot = bedrock.createClient(CONFIG);
 
     bot.on('spawn', () => {
-        console.log(`[Bot] Sucesso! O bot '${config.username}' entrou no servidor e está AFK.`);
+        console.log(`[Bot] Sucesso! O bot '${CONFIG.username}' entrou no servidor.`);
     });
 
     bot.on('text', (packet) => {
-        if (packet.source_name !== config.username) {
+        if (packet.source_name !== CONFIG.username) {
             console.log(`[Chat] ${packet.source_name}: ${packet.message}`);
         }
     });
@@ -44,11 +44,10 @@ function iniciarBot() {
     });
 
     bot.on('close', () => {
-        console.log('[Bot] Conexão encerrada. Tentando reconectar em 15 segundos...');
-        setTimeout(() => {
-            iniciarBot();
-        }, 15000);
+        console.log('[Bot] Conexão encerrada. Tentando reconectar no mesmo IP/Porta em 15 segundos...');
+        setTimeout(iniciarBot, 15000);
     });
 }
 
+// Inicia o bot
 iniciarBot();
