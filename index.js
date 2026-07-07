@@ -4,13 +4,17 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// =============== CONFIGURAÇÃO NOVA ===============
 const CONFIG = {
     host: 'AbyssMCPE.aternos.me', 
     port: 30780, 
     username: 'VictorAFK',           
     offline: true,
-    skipPing: true
+    // REMOVIDO: skipPing: true (Agora ele vai pingar para testar a versão)
+    // ADICIONADO: connectTimeout: 10000 (Dá mais tempo para a Aternos responder)
+    connectTimeout: 10000 
 };
+// ===============================================
 
 app.get('/', (req, res) => {
     res.send('Bot AFK Bedrock Ativo e Monitorado!');
@@ -20,77 +24,51 @@ app.listen(PORT, () => {
     console.log(`[Render] Servidor Web ativo na porta ${PORT}`);
 });
 
-let botAtivo = null;
-let reconexaoAgendada = false;
-let tentativas = 0;
-const DELAY_INICIAL = 5000; // 5 segundos
-const DELAY_MAXIMO = 60000; // 1 minuto
-
-function calcularDelayReconexao() {
-    // Backoff exponencial: 5s, 10s, 20s, 40s, 60s, 60s...
-    const delay = Math.min(DELAY_INICIAL * Math.pow(2, tentativas), DELAY_MAXIMO);
-    return Math.floor(delay);
-}
+let executandoReconexao = false; 
 
 function iniciarBot() {
-    // ✅ Impede múltiplas instâncias simultâneas
-    if (botAtivo) {
-        console.log('[Bot] Já existe uma conexão ativa.');
+    if (executandoReconexao) return;
+    
+    console.log(`[Bot] Iniciando Ping e tentando conectar em ${CONFIG.host}:${CONFIG.port}...`);
+    
+    let bot;
+    try {
+        bot = bedrock.createClient(CONFIG);
+    } catch (e) {
+        console.error('[Erro Crítico na Criação]:', e);
+        agendarReconexao();
         return;
     }
-    
-    console.log(`[Bot] Tentando conectar em ${CONFIG.host}:${CONFIG.port}... (Tentativa ${tentativas + 1})`);
-    const bot = bedrock.createClient(CONFIG);
-    botAtivo = bot;
 
     bot.on('spawn', () => {
-        console.log(`[Bot] ✅ Sucesso! O bot '${CONFIG.username}' entrou no servidor.`);
-        tentativas = 0; // ✅ Reset contador em caso de sucesso
-        reconexaoAgendada = false;
+        console.log(`[Bot] Sucesso! O bot '${CONFIG.username}' entrou no servidor.`);
+        executandoReconexao = false; 
     });
 
-    bot.on('text', (packet) => {
-        if (packet.source_name !== CONFIG.username) {
-            console.log(`[Chat] ${packet.source_name}: ${packet.message}`);
-        }
+    bot.on('disconnect', (packet) => {
+        console.log('[Bot] Desconectado pelo servidor. Motivo:', packet.message || packet.reason || 'Desconhecido');
     });
 
     bot.on('error', (err) => {
-        console.error('[Erro no Bot]:', err.message);
-        botAtivo = null;
+        console.error('[Erro de Conexão]:', err.message);
         agendarReconexao();
     });
 
     bot.on('close', () => {
-        console.log('[Bot] Conexão perdida com o servidor.');
-        botAtivo = null; // ✅ Limpa referência
+        console.log('[Bot] Conexão encerrada.');
         agendarReconexao();
     });
 }
 
 function agendarReconexao() {
-    // ✅ Evita agendar múltiplas reconexões
-    if (reconexaoAgendada) return;
-    
-    reconexaoAgendada = true;
-    tentativas++;
-    
-    const delayAjustado = calcularDelayReconexao();
-    console.log(`[Sistema] ⏳ Reconectando em ${delayAjustado / 1000}s... (Tentativa ${tentativas})`);
-    
+    if (executandoReconexao) return;
+    executandoReconexao = true;
+
+    console.log('[Sistema] Agendando nova tentativa de conexão em 30 segundos...');
     setTimeout(() => {
-        reconexaoAgendada = false;
+        executandoReconexao = false;
         iniciarBot();
-    }, delayAjustado);
+    }, 30000); 
 }
 
 iniciarBot();
-
-// ✅ Graceful shutdown
-process.on('SIGINT', () => {
-    console.log('[Sistema] Encerrando...');
-    if (botAtivo) {
-        botAtivo.close();
-    }
-    process.exit(0);
-});
