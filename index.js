@@ -20,7 +20,6 @@ app.listen(PORT, () => {
     console.log(`[Render] Servidor Web ativo na porta ${PORT}`);
 });
 
-
 let executandoReconexao = false; 
 
 function iniciarBot() {
@@ -42,7 +41,6 @@ function iniciarBot() {
 
     bot.on('error', (err) => {
         console.error('[Erro no Bot]:', err.message);
-        
         agendarReconexao();
     });
 
@@ -56,12 +54,12 @@ function agendarReconexao() {
     if (executandoReconexao) return;
     executandoReconexao = true;
 
-    console.log('[Sistema] Agendando nova tentativa de conexão em 15 segundos...');
+
+    console.log('[Sistema] Agendando nova tentativa de conexão em 60 segundos...');
     setTimeout(() => {
         executandoReconexao = false;
         iniciarBot();
-    }, 15000);
+    }, 60000); 
 }
-
 
 iniciarBot();
